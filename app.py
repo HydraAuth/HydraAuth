@@ -199,5 +199,15 @@ def get_users():
     category = request.form["category"]
     return jsonify(data.get(category, []))
 
+@app.route("/send_message", methods=["POST"])
+def send_message():
+    username = request.form.get("username")
+    message = request.form.get("message")
+    
+    # Store, log or send the message (to Discord, email, DB, etc.)
+    print(f"Message to {username}: {message}")
+    
+    return jsonify({"status": "success", "message": "Message sent successfully"})
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
