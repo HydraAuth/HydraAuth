@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# Admin credentials
+# Admin login credentials
 ADMIN_USERNAME = "RTX"
 ADMIN_PASSWORD = "3050"
 
@@ -18,33 +18,6 @@ HEADERS = {
     "Content-Type": "application/json",
     "X-Master-Key": JSONBIN_API_KEY
 }
-
-# ---------------------------- Auth Routes ----------------------------
-
-@app.route("/")
-def home():
-    if session.get("logged_in"):
-        return render_template("index.html")
-    return redirect(url_for("login"))
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session["logged_in"] = True
-            return redirect(url_for("home"))
-        else:
-            return render_template("login.html", error="Invalid credentials")
-    return render_template("login.html")
-
-@app.route("/logout")
-def logout():
-    session.pop("logged_in", None)
-    return redirect(url_for("login"))
-
-# ---------------------------- JSONBin Logic ----------------------------
 
 def load_data():
     try:
@@ -64,6 +37,22 @@ def save_data(data):
         print("Save Error:", e)
         return False
 
+@app.route("/create_app", methods=["POST"])
+def create_app():
+    data = load_data()
+    app_name = request.form.get("app_name", "").strip()
+    if not app_name:
+        return jsonify({"status": "error", "message": "App name required"})
+
+    if app_name in data:
+        return jsonify({"status": "error", "message": "Application already exists"})
+
+    data[app_name] = []
+
+    if save_data(data):
+        return jsonify({"status": "success", "message": "Application created!"})
+    return jsonify({"status": "error", "message": "Failed to create app"})
+
 @app.route("/add_user", methods=["POST"])
 def add_user():
     data = load_data()
@@ -73,7 +62,7 @@ def add_user():
     expiry = request.form["expiry"]
 
     if category not in data:
-        data[category] = []
+        return jsonify({"status": "error", "message": "Invalid application"})
 
     if any(u["Username"] == username for u in data[category]):
         return jsonify({"status": "error", "message": "Username already exists"})
@@ -84,42 +73,32 @@ def add_user():
         "HWID": None,
         "Status": "Active",
         "Expiry": expiry,
-        "CreatedAt": datetime.today().strftime("%Y-%m-%d")
+        "CreatedAt": datetime.today().strftime("%Y-%m-%d"),
+        "Messages": []
     })
 
     if save_data(data):
         return jsonify({"status": "success", "message": "User added successfully"})
     return jsonify({"status": "error", "message": "Failed to add user"})
 
-@app.route("/client_login", methods=["POST"])
-def client_login():
+@app.route("/delete_user", methods=["POST"])
+def delete_user():
     data = load_data()
     category = request.form["category"]
     username = request.form["username"]
-    password = request.form["password"]
-    client_hwid = request.form["hwid"]
 
     if category not in data:
         return jsonify({"status": "error", "message": "Invalid application"})
 
-    for user in data[category]:
-        if user["Username"] == username and user["Password"] == password:
-            if user["Status"] != "Active":
-                return jsonify({"status": "error", "message": "Account paused"})
+    original_len = len(data[category])
+    data[category] = [u for u in data[category] if u["Username"] != username]
 
-            if user["HWID"] in [None, ""]:
-                user["HWID"] = client_hwid
-                if save_data(data):
-                    return jsonify({"status": "success", "message": "HWID bound. Login success"})
-                else:
-                    return jsonify({"status": "error", "message": "Failed to bind HWID"})
+    if len(data[category]) == original_len:
+        return jsonify({"status": "error", "message": "User not found"})
 
-            if user["HWID"] != client_hwid:
-                return jsonify({"status": "error", "message": "HWID mismatch. Access denied"})
-
-            return jsonify({"status": "success", "message": "Login success"})
-
-    return jsonify({"status": "error", "message": "Invalid username or password"})
+    if save_data(data):
+        return jsonify({"status": "success", "message": "User deleted"})
+    return jsonify({"status": "error", "message": "Failed to delete user"})
 
 @app.route("/pause_user", methods=["POST"])
 def pause_user():
@@ -140,25 +119,6 @@ def pause_user():
             return jsonify({"status": "error", "message": "Failed to update user"})
 
     return jsonify({"status": "error", "message": "User not found"})
-
-@app.route("/delete_user", methods=["POST"])
-def delete_user():
-    data = load_data()
-    category = request.form["category"]
-    username = request.form["username"]
-
-    if category not in data:
-        return jsonify({"status": "error", "message": "Invalid application"})
-
-    original_len = len(data[category])
-    data[category] = [u for u in data[category] if u["Username"] != username]
-
-    if len(data[category]) == original_len:
-        return jsonify({"status": "error", "message": "User not found"})
-
-    if save_data(data):
-        return jsonify({"status": "success", "message": "User deleted"})
-    return jsonify({"status": "error", "message": "Failed to update data"})
 
 @app.route("/reset_hwid", methods=["POST"])
 def reset_hwid():
@@ -198,6 +158,33 @@ def get_users():
     data = load_data()
     category = request.form["category"]
     return jsonify(data.get(category, []))
+
+@app.route("/send_message", methods=["POST"])
+def send_message():
+    data = load_data()
+    category = request.form["category"]
+    username = request.form["username"]
+    message = request.form["message"]
+
+    if not message.strip():
+        return jsonify({"status": "error", "message": "Message cannot be empty"})
+
+    if category not in data:
+        return jsonify({"status": "error", "message": "Invalid application"})
+
+    for user in data[category]:
+        if user["Username"] == username:
+            if "Messages" not in user:
+                user["Messages"] = []
+            user["Messages"].append({
+                "Text": message,
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
+            if save_data(data):
+                return jsonify({"status": "success", "message": "Message sent"})
+            return jsonify({"status": "error", "message": "Failed to send message"})
+
+    return jsonify({"status": "error", "message": "User not found"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
