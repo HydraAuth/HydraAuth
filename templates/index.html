@@ -51,6 +51,8 @@
   <a href="#" onclick="showSection('show', event)">📋 Show Users</a>
   <a href="#" onclick="showSection('reset', event)">🔄 Reset HWID</a>
  <a href="#" onclick="showSection('sendmsg', event)">✉️ Send Message</a>
+<a href="#" onclick="showSection('project', event)">📁 Project Name</a>
+
 </div>
 </div>
 
@@ -133,18 +135,29 @@
     </form>
   </div>
 
-<!-- Send Message -->
-<div id="sendmsg" class="section">
-  <h4>✉️ Send Message</h4>
-  <form onsubmit="sendMessage(event)">
-    <div class="mb-2">
-      <input required type="text" class="form-control" placeholder="Username" id="message_username">
-    </div>
-    <div class="mb-2">
-      <textarea required class="form-control" rows="4" placeholder="Type your message..." id="message_text"></textarea>
-    </div>
-    <button class="btn btn-primary">Send</button>
-  </form>
+<!-- Project Name -->
+<div id="project" class="section">
+  <h4>📁 Project Name</h4>
+  <div class="mb-3 position-relative">
+    <pre id="loginCode" class="bg-dark text-white p-3 rounded" style="font-family: monospace; white-space: pre-wrap; word-break: break-word; min-height: 180px;">
+HydraAuth.login(textBox1.Text, textBox2.Text);
+
+if (HydraAuth.response.status == "success")
+{
+    Form2 main = new Form2(); // Replace with your Form2 if needed
+    main.Show();
+    this.Hide();
+}
+else
+{
+    label1.Text = "Status: " + HydraAuth.response.message;
+}
+    </pre>
+    <button class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-2" onclick="copyCode()">📋</button>
+  </div>
+
+  <!-- 👇 Add this below code block -->
+  <a href="/static/HydraAuth.cs" download class="btn btn-success btn-sm">⬇️ Click here to download</a>
 </div>
 </div>
 
@@ -289,8 +302,13 @@ function sendMessage(e) {
     }
   });
 }
-
+function copyCode() {
+  console.log("clicked");
+  const code = document.getElementById("loginCode").innerText;
+  navigator.clipboard.writeText(code)
+    .then(() => showToast("Copied login code!"))
+    .catch(() => showToast("Copy failed!"));
+}
 </script>
-
 </body>
 </html>
