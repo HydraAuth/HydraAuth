@@ -135,151 +135,126 @@
 <div id="toast" class="toast" style="display:none;"></div>
 
 <script>
+function showSection(id, e) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  if (e) e.target.classList.add('active');
+  if (id === 'show') refreshUsers();
+}
+
 function showToast(msg) {
-  const toast = document.getElementById("toast");
-  toast.textContent = msg;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
+  const toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.style.display = 'block';
+  toast.style.animation = 'slideIn 0.5s forwards';
+  setTimeout(() => toast.style.right = '-300px', 3000);
 }
 
 function getCategory() {
-  const app = document.getElementById('appSelect').value;
-  if (!app || app === "Select App") {
-    showToast("❗ Select an app");
-    return null;
-  }
-  return app;
+  return document.getElementById('appSelect').value;
 }
 
-function createApp() {
-  const name = document.getElementById('appName').value.trim();
-  if (!name) return showToast('❗ Enter application name');
-  fetch('/create_app', {
+function addUser(e) {
+  e.preventDefault();
+  fetch('/add_user', {
     method: 'POST',
-    body: new URLSearchParams({ app_name: name })
+    body: new URLSearchParams({
+      category: getCategory(),
+      username: document.getElementById('add_username').value,
+      password: document.getElementById('add_password').value,
+      expiry: document.getElementById('add_expiry').value
+    })
   }).then(res => res.json()).then(d => {
     showToast(d.message);
+    if (d.status === 'success') refreshUsers();
+  });
+}
+
+function deleteUser(e) {
+  e.preventDefault();
+  fetch('/delete_user', {
+    method: 'POST',
+    body: new URLSearchParams({
+      category: getCategory(),
+      username: document.getElementById('delete_username').value
+    })
+  }).then(res => res.json()).then(d => {
+    showToast(d.message);
+    if (d.status === 'success') refreshUsers();
+  });
+}
+
+function pauseUser(e, action) {
+  e.preventDefault();
+  fetch('/pause_user', {
+    method: 'POST',
+    body: new URLSearchParams({
+      category: getCategory(),
+      username: document.getElementById('pause_username').value,
+      action: action
+    })
+  }).then(res => res.json()).then(d => showToast(d.message));
+}
+
+function infoUser(e) {
+  e.preventDefault();
+  fetch('/info_user', {
+    method: 'POST',
+    body: new URLSearchParams({
+      category: getCategory(),
+      username: document.getElementById('info_username').value
+    })
+  }).then(res => res.json()).then(d => {
     if (d.status === 'success') {
-      const select = document.getElementById('appSelect');
-      const option = document.createElement('option');
-      option.value = name;
-      option.text = name;
-      select.add(option);
+      const u = d.data;
+      document.getElementById('infoPanel').innerHTML = `
+        <div class="card mt-3"><div class="card-body">
+          <p><b>User:</b> ${u.Username}</p>
+          <p><b>Pass:</b> ${u.Password}</p>
+          <p><b>HWID:</b> ${u.HWID || 'None'}</p>
+          <p><b>Expiry:</b> ${u.Expiry}</p>
+          <p><b>Created:</b> ${u.CreatedAt}</p>
+          <p><b>Status:</b> ${u.Status || 'Unknown'}</p>
+        </div></div>
+      `;
+    } else {
+      showToast(d.message);
     }
   });
 }
 
-function createUser() {
-  const category = getCategory(); if (!category) return;
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const expiry = document.getElementById('expiry').value;
-  if (!username || !password || !expiry) return showToast("❗ Fill all fields");
-
-  fetch('/add_user', {
-    method: 'POST',
-    body: new URLSearchParams({ category, username, password, expiry })
-  }).then(res => res.json()).then(d => {
-    showToast(d.message);
-  });
-}
-
-function removeUser() {
-  const category = getCategory(); if (!category) return;
-  const user = document.getElementById('removeUsername').value.trim();
-  fetch('/delete_user', {
-    method: 'POST',
-    body: new URLSearchParams({ category, username: user })
-  }).then(res => res.json()).then(d => {
-    showToast(d.message);
-  });
-}
-
-function pauseUser() {
-  const category = getCategory(); if (!category) return;
-  const user = document.getElementById('suspendUsername').value.trim();
-  fetch('/pause_user', {
-    method: 'POST',
-    body: new URLSearchParams({ category, username: user, action: 'pause' })
-  }).then(res => res.json()).then(d => showToast(d.message));
-}
-
-function unpauseUser() {
-  const category = getCategory(); if (!category) return;
-  const user = document.getElementById('suspendUsername').value.trim();
-  fetch('/pause_user', {
-    method: 'POST',
-    body: new URLSearchParams({ category, username: user, action: 'unpause' })
-  }).then(res => res.json()).then(d => showToast(d.message));
-}
-
-function resetHWID() {
-  const category = getCategory(); if (!category) return;
-  const user = document.getElementById('resetUsername').value.trim();
-  fetch('/reset_hwid', {
-    method: 'POST',
-    body: new URLSearchParams({ category, username: user })
-  }).then(res => res.json()).then(d => showToast(d.message));
-}
-
-function showUserInfo() {
-  const category = getCategory(); if (!category) return;
-  const username = document.getElementById('searchUser').value.trim();
-  fetch('/info_user', {
-    method: 'POST',
-    body: new URLSearchParams({ category, username })
-  }).then(res => res.json()).then(d => {
-    const box = document.getElementById('userInfoOutput');
-    if (d.status !== 'success') return box.textContent = d.message;
-    const u = d.data;
-    box.textContent = `👤 Username: ${u.Username}
-🔐 Password: ${u.Password}
-🖥️ HWID: ${u.HWID || 'None'}
-📛 Status: ${u.Status}
-📅 Expiry: ${u.Expiry}
-🕒 Created At: ${u.CreatedAt}`;
-  });
-}
-
-function loadUsersTable() {
-  const category = getCategory(); if (!category) return;
+function refreshUsers() {
   fetch('/get_users', {
     method: 'POST',
-    body: new URLSearchParams({ category })
+    body: new URLSearchParams({ category: getCategory() })
   }).then(res => res.json()).then(users => {
-    const tbody = document.querySelector("#usersTable tbody");
-    tbody.innerHTML = "";
+    const table = document.getElementById('userList');
+    table.innerHTML = '';
     users.forEach(u => {
-      tbody.innerHTML += `<tr>
+      table.innerHTML += `<tr>
         <td>${u.Username}</td>
         <td>${u.Password}</td>
         <td>${u.HWID || 'None'}</td>
-        <td>${u.Status}</td>
         <td>${u.Expiry}</td>
         <td>${u.CreatedAt}</td>
+        <td>${u.Status || 'Unknown'}</td>
       </tr>`;
     });
   });
 }
 
-function sendMessage() {
-  const category = getCategory(); if (!category) return;
-  const username = document.getElementById('messageUser').value.trim();
-  const message = document.getElementById('messageText').value.trim();
-  if (!username || !message) return showToast("❗ Fill username & message");
-
-  fetch('/send_message', {
+function resetHWID(e) {
+  e.preventDefault();
+  fetch('/reset_hwid', {
     method: 'POST',
-    body: new URLSearchParams({ category, username, message })
-  }).then(res => res.json()).then(d => {
-    showToast(d.message);
-    if (d.status === 'success') {
-      document.getElementById('messageText').value = "";
-    }
-  });
+    body: new URLSearchParams({
+      category: getCategory(),
+      username: document.getElementById('reset_username').value
+    })
+  }).then(res => res.json()).then(d => showToast(d.message));
 }
 </script>
 
 </body>
 </html>
-
