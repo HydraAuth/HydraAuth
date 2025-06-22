@@ -50,6 +50,8 @@
   <a href="#" onclick="showSection('info', event)">ℹ️ Info User</a>
   <a href="#" onclick="showSection('show', event)">📋 Show Users</a>
   <a href="#" onclick="showSection('reset', event)">🔄 Reset HWID</a>
+ <a href="#" onclick="showSection('sendmsg', event)">✉️ Send Message</a>
+</div>
 </div>
 
 <div class="main">
@@ -130,6 +132,20 @@
       <button class="btn btn-dark">Reset HWID</button>
     </form>
   </div>
+
+<!-- Send Message -->
+<div id="sendmsg" class="section">
+  <h4>✉️ Send Message</h4>
+  <form onsubmit="sendMessage(event)">
+    <div class="mb-2">
+      <input required type="text" class="form-control" placeholder="Username" id="message_username">
+    </div>
+    <div class="mb-2">
+      <textarea required class="form-control" rows="4" placeholder="Type your message..." id="message_text"></textarea>
+    </div>
+    <button class="btn btn-primary">Send</button>
+  </form>
+</div>
 </div>
 
 <div id="toast" class="toast" style="display:none;"></div>
@@ -254,6 +270,26 @@ function resetHWID(e) {
     })
   }).then(res => res.json()).then(d => showToast(d.message));
 }
+
+function sendMessage(e) {
+  e.preventDefault();
+  fetch('/send_message', {
+    method: 'POST',
+    body: new URLSearchParams({
+      username: document.getElementById('message_username').value,
+      message: document.getElementById('message_text').value
+    })
+  })
+  .then(res => res.json())
+  .then(d => {
+    showToast(d.message);
+    if (d.status === 'success') {
+      document.getElementById('message_username').value = '';
+      document.getElementById('message_text').value = '';
+    }
+  });
+}
+
 </script>
 
 </body>
