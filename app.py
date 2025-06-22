@@ -201,13 +201,33 @@ def get_users():
 
 @app.route("/send_message", methods=["POST"])
 def send_message():
-    username = request.form.get("username")
-    message = request.form.get("message")
-    
-    # Store, log or send the message (to Discord, email, DB, etc.)
-    print(f"Message to {username}: {message}")
-    
-    return jsonify({"status": "success", "message": "Message sent successfully"})
+    data = load_data()
+    username = request.form["username"]
+    message = request.form["message"]
+
+    # Search user in all categories
+    found = False
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    for category, users in data.items():
+        for user in users:
+            if user["Username"] == username:
+                if "Messages" not in user:
+                    user["Messages"] = []
+                user["Messages"].append({
+                    "text": message,
+                    "time": now
+                })
+                found = True
+                break
+        if found:
+            break
+
+    if not found:
+        return jsonify({"status": "error", "message": "User not found"})
+
+    if save_data(data):
+        return jsonify({"status": "success", "message": "Message saved"})
+    return jsonify({"status": "error", "message": "Failed to save message"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
