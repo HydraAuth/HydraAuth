@@ -135,6 +135,20 @@
     </form>
   </div>
 
+<!-- Send Message -->
+<div id="sendmsg" class="section">
+  <h4>✉️ Send Message</h4>
+  <form onsubmit="sendMessage(event)">
+    <div class="mb-2">
+      <input required type="text" class="form-control" placeholder="Username" id="message_username">
+    </div>
+    <div class="mb-2">
+      <textarea required class="form-control" rows="4" placeholder="Type your message..." id="message_text"></textarea>
+    </div>
+    <button class="btn btn-primary">Send</button>
+  </form>
+</div>
+
 <!-- Project Name -->
 <div id="project" class="section">
   <h4>📁 Project Name</h4>
