@@ -199,6 +199,21 @@ def get_users():
     category = request.form["category"]
     return jsonify(data.get(category, []))
 
+@app.route("/get_messages", methods=["POST"])
+def get_messages():
+    data = load_data()
+    category = request.form["category"]
+    username = request.form["username"]
+
+    if category not in data:
+        return jsonify({"status": "error", "message": "Invalid application"})
+
+    for user in data[category]:
+        if user["Username"] == username:
+            return jsonify({"status": "success", "messages": user.get("Messages", [])})
+
+    return jsonify({"status": "error", "message": "User not found"})
+
 @app.route("/send_message", methods=["POST"])
 def send_message():
     data = load_data()
