@@ -168,15 +168,27 @@
 <!-- Send Message -->
 <div id="sendmsg" class="section">
   <h4>✉️ Send Message</h4>
-  <form onsubmit="sendMessage(event)">
-    <div class="mb-2">
-      <input required type="text" class="form-control" placeholder="Username" id="message_username">
+
+  <!-- Load Messages Form -->
+  <form onsubmit="loadUserMessages(event)" class="mb-3">
+    <div class="input-group">
+      <input required type="text" class="form-control" placeholder="Enter Username" id="message_username">
+      <button class="btn btn-secondary">🔄 Load</button>
     </div>
+  </form>
+
+  <!-- Send Message Form -->
+  <form onsubmit="sendMessage(event)" class="mb-3">
     <div class="mb-2">
-      <textarea required class="form-control" rows="4" placeholder="Type your message..." id="message_text"></textarea>
+      <textarea required class="form-control" rows="2" placeholder="Type your message..." id="message_text"></textarea>
     </div>
     <button class="btn btn-primary">Send</button>
   </form>
+
+  <!-- Message List -->
+  <div id="messageList" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 8px;">
+    <!-- Messages will appear here -->
+  </div>
 </div>
 
 <!-- Project Name -->
@@ -332,20 +344,97 @@ function resetHWID(e) {
 
 function sendMessage(e) {
   e.preventDefault();
+  const user = document.getElementById("message_username").value.trim();
+  const msg = document.getElementById("message_text").value.trim();
+
   fetch('/send_message', {
     method: 'POST',
     body: new URLSearchParams({
-      username: document.getElementById('message_username').value,
-      message: document.getElementById('message_text').value
+      username: user,
+      message: msg
     })
   })
   .then(res => res.json())
   .then(d => {
     showToast(d.message);
     if (d.status === 'success') {
-      document.getElementById('message_username').value = '';
-      document.getElementById('message_text').value = '';
+      document.getElementById("message_text").value = '';
+      loadMessages(user);
     }
+  });
+}
+function loadUserMessages(e) {
+  e.preventDefault();
+  const username = document.getElementById("message_username").value.trim();
+  if (username) {
+    loadMessages(username);
+  }
+}
+
+document.getElementById("message_username").addEventListener("input", () => {
+  const username = document.getElementById("message_username").value.trim();
+  if (username.length >= 3) loadMessages(username); // 3 char baad load
+});
+function loadMessages(username) {
+  const category = document.getElementById("appSelect").value;
+
+  fetch('/get_messages', {
+    method: 'POST',
+    body: new URLSearchParams({
+      category: category,
+      username: username
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const box = document.getElementById("messageList");
+    box.innerHTML = '';
+
+    if (data.status === 'success') {
+      data.messages.forEach((m, i) => {
+        const div = document.createElement("div");
+        div.className = "border rounded p-2 mb-2 position-relative";
+        div.innerHTML = `
+          <div>
+            <b>${m.status === "inactive" ? "<s>" : ""}${m.text}${m.status === "inactive" ? "</s>" : ""}</b><br>
+            <small>${m.time}</small>
+            <div style="position: absolute; top: 5px; right: 10px; cursor: pointer;" onclick="toggleMenu(${i})">⋮</div>
+            <div id="menu-${i}" class="bg-light border rounded p-1" style="position:absolute; top:25px; right:10px; display:none; z-index:99;">
+              <button onclick="updateMsg('${username}', ${i}, 'active')" class="btn btn-sm btn-success w-100">Active</button>
+              <button onclick="updateMsg('${username}', ${i}, 'inactive')" class="btn btn-sm btn-warning w-100">Inactive</button>
+              <button onclick="updateMsg('${username}', ${i}, 'delete')" class="btn btn-sm btn-danger w-100">Delete</button>
+            </div>
+          </div>
+        `;
+        box.appendChild(div);
+      });
+    } else {
+      box.innerHTML = '<div class="text-muted">No messages found.</div>';
+    }
+  });
+}
+
+function toggleMenu(i) {
+  const m = document.getElementById(`menu-${i}`);
+  m.style.display = m.style.display === "none" ? "block" : "none";
+}
+
+function updateMsg(username, index, action) {
+  const category = document.getElementById("appSelect").value;
+
+  fetch('/update_message_status', {
+    method: "POST",
+    body: new URLSearchParams({
+      username: username,
+      category: category,
+      index: index,
+      action: action
+    })
+  })
+  .then(res => res.json())
+  .then(d => {
+    showToast(d.message);
+    loadMessages(username);
   });
 }
 function copyCode() {
