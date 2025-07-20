@@ -64,6 +64,8 @@ def save_data(data):
         print("Save Error:", e)
         return False
 
+# ---------------------------- User Management ----------------------------
+
 @app.route("/add_user", methods=["POST"])
 def add_user():
     data = load_data()
@@ -199,6 +201,8 @@ def get_users():
     category = request.form["category"]
     return jsonify(data.get(category, []))
 
+# ---------------------------- Messaging ----------------------------
+
 @app.route("/get_messages", methods=["POST"])
 def get_messages():
     data = load_data()
@@ -219,10 +223,9 @@ def send_message():
     data = load_data()
     username = request.form["username"]
     message = request.form["message"]
-
-    # Search user in all categories
-    found = False
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    found = False
+
     for category, users in data.items():
         for user in users:
             if user["Username"] == username:
@@ -230,7 +233,8 @@ def send_message():
                     user["Messages"] = []
                 user["Messages"].append({
                     "text": message,
-                    "time": now
+                    "time": now,
+                    "status": "active"  # ✅ Important
                 })
                 found = True
                 break
@@ -243,6 +247,35 @@ def send_message():
     if save_data(data):
         return jsonify({"status": "success", "message": "Message saved"})
     return jsonify({"status": "error", "message": "Failed to save message"})
+
+@app.route("/update_message_status", methods=["POST"])
+def update_message_status():
+    data = load_data()
+    category = request.form["category"].strip().lower()
+    username = request.form["username"].strip().lower()
+    index = int(request.form["index"])
+    action = request.form["action"]
+
+    lowered_data = {k.lower(): v for k, v in data.items()}
+
+    if category not in lowered_data:
+        return jsonify({"status": "error", "message": "Invalid application"})
+
+    for user in lowered_data[category]:
+        if user["Username"].lower() == username:
+            if "Messages" in user and index < len(user["Messages"]):
+                if action == "delete":
+                    user["Messages"].pop(index)
+                else:
+                    user["Messages"][index]["status"] = action
+                if save_data(data):
+                    return jsonify({"status": "success", "message": f"Message {action}d"})
+                return jsonify({"status": "error", "message": "Failed to update message"})
+            return jsonify({"status": "error", "message": "Invalid message index"})
+
+    return jsonify({"status": "error", "message": "User not found"})
+
+# ---------------------------- Run ----------------------------
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
