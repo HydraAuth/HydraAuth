@@ -196,17 +196,30 @@
   <h4>📁 Project Name</h4>
   <div class="mb-3 position-relative">
     <pre id="loginCode" class="bg-dark text-white p-3 rounded" style="font-family: monospace; white-space: pre-wrap; word-break: break-word; min-height: 180px;">
-HydraAuth.login(textBox1.Text, textBox2.Text);
+HydraAuth.login(guna2TextBox1.Text, guna2TextBox2.Text);
 
 if (HydraAuth.response.status == "success")
 {
-    Form2 main = new Form2(); // Replace with your Form2 if needed
+    string message = HydraAuth.GetLatestMessage(guna2TextBox1.Text); // ← Username pass karo
+
+    if (!string.IsNullOrEmpty(message))
+    {
+        var msgDialog = new Guna2MessageDialog();
+        msgDialog.Caption = "Admin Message";
+        msgDialog.Text = message;
+        msgDialog.Icon = MessageDialogIcon.Warning; // Optional Icon
+        msgDialog.Buttons = MessageDialogButtons.OK;
+        msgDialog.Show();
+
+    }
+
+    Form2 main = new Form2();  // ← Proceed to Form2
     main.Show();
     this.Hide();
 }
 else
 {
-    label1.Text = "Status: " + HydraAuth.response.message;
+    status.Text = "Status: " + HydraAuth.response.message;
 }
     </pre>
     <button class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-2" onclick="copyCode()">📋</button>
