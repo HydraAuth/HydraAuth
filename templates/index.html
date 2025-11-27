@@ -2,92 +2,404 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>User Management</title>
+  <title>HydraAuth - User Management</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background-color: #eef1f7; font-family: 'Segoe UI', sans-serif; }
-    .sidebar {
-      width: 240px; height: 100vh; position: fixed; background-color: #fff;
-      border-right: 1px solid #ddd; padding: 20px 0; border-top-right-radius: 15px;
-      border-bottom-right-radius: 15px; box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .sidebar h5, .sidebar p { text-align: center; }
-    .sidebar a {
-      display: block; padding: 12px 20px; color: #333; text-decoration: none;
-      border-radius: 10px; margin: 6px 12px; transition: 0.3s;
+    
+    body { 
+      background: linear-gradient(135deg, #0a1929 0%, #1a2332 50%, #0f3d4d 100%);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      color: #e0e7ff;
     }
-    .sidebar a.active, .sidebar a:hover { background-color: #007bff; color: white; }
-    .main {
-      margin-left: 260px; padding: 30px 40px; background-color: #f9fbff;
-      border-top-left-radius: 15px; border-bottom-left-radius: 15px; min-height: 100vh;
+    
+    /* Top Navigation */
+    .top-nav {
+      background: rgba(10, 25, 41, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+      padding: 0;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
-    .form-label { font-weight: 600; }
-    .section { display: none; }
+    
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      max-width: 100%;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .nav-links a:hover {
+      color: #e0e7ff;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-links a.active {
+      color: white;
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    /* Main Content */
+    .main-content {
+      margin-top: 80px;
+      padding: 40px;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* App Selector Card */
+    .app-selector-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .form-label { 
+      font-weight: 600;
+      color: #e0e7ff;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .form-select, .form-control {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 15px;
+      color: #e0e7ff;
+      transition: all 0.3s ease;
+    }
+    
+    .form-select:focus, .form-control:focus {
+      background: rgba(30, 41, 59, 1);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      outline: none;
+      color: #e0e7ff;
+    }
+    
+    .form-select option {
+      background: #1e293b;
+      color: #e0e7ff;
+    }
+    
+    /* Section Cards */
+    .section { 
+      display: none;
+    }
+    
     .section.active {
-      display: block; background-color: white; padding: 25px;
-      border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      display: block;
+      animation: fadeInUp 0.4s ease;
     }
+    
+    .section-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .section-card h4 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #e0e7ff;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+    
+    .btn-warning:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+    }
+    
+    .btn-dark {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+    }
+    
+    /* Toast Notification */
     .toast {
-      position: fixed; bottom: 20px; right: -300px; min-width: 250px;
-      background-color: #333; color: white; padding: 12px 24px;
-      border-radius: 6px; box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      animation: slideIn 0.5s forwards; z-index: 1000;
+      position: fixed;
+      bottom: 30px;
+      right: -350px;
+      min-width: 300px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      color: #e0e7ff;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      animation: slideIn 0.5s forwards;
+      z-index: 1000;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-left: 4px solid #3b82f6;
+      font-weight: 500;
     }
+    
     @keyframes slideIn {
-      from { right: -300px; } to { right: 20px; }
+      from { right: -350px; } 
+      to { right: 30px; }
     }
-    .user-table { font-size: 14px; }
-
-
-  .download-title {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-top: 1rem;
-    margin-bottom: 0.3rem;
-  }
-
-  .download-desc {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 0.95rem;
-    color: #34495e;
-    margin-bottom: 0.4rem;
-  }
-
-  .developer {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #e67e22;
-  background-color: #fdf2e9;
-  padding: 4px 8px;
-  border-radius: 4px;
-  display: inline-block;
-  margin-bottom: 1rem; /* Increase from 0.6rem to 1rem */
-}
-  }
+    
+    /* Table Styling */
+    .table {
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.4);
+    }
+    
+    .table thead {
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+      color: white;
+    }
+    
+    .table thead th {
+      padding: 16px;
+      font-weight: 600;
+      border: none;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .table tbody td {
+      padding: 14px 16px;
+      vertical-align: middle;
+      font-size: 14px;
+      color: #cbd5e1;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+      background: rgba(30, 41, 59, 0.3);
+    }
+    
+    .table tbody tr:hover {
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    /* Card Info Panel */
+    .card {
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.4);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+    
+    .card-body {
+      padding: 24px;
+    }
+    
+    .card-body p {
+      margin-bottom: 12px;
+      color: #cbd5e1;
+      font-size: 15px;
+    }
+    
+    .card-body b {
+      color: #e0e7ff;
+      font-weight: 600;
+    }
+    
+    /* Code Block */
+    #loginCode {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      color: #cbd5e1;
+    }
+    
+    .developer {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 16px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    /* Message List */
+    #messageList {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.3);
+    }
+    
+    #messageList::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    #messageList::-webkit-scrollbar-track {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 4px;
+    }
+    
+    #messageList::-webkit-scrollbar-thumb {
+      background: #3b82f6;
+      border-radius: 4px;
+    }
+    
+    .input-group .btn {
+      border-radius: 0 10px 10px 0 !important;
+    }
+    
+    textarea.form-control {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    ::placeholder {
+      color: #64748b;
+    }
   </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <h5 class="text-primary">User Manager</h5>
-  <p class="text-muted">Sagar</p>
-  <a href="#" onclick="showSection('add', event)">➕ Add User</a>
-  <a href="#" onclick="showSection('delete', event)">❌ Delete User</a>
-  <a href="#" onclick="showSection('pause', event)">⏸️ Pause User</a>
-  <a href="#" onclick="showSection('info', event)">ℹ️ Info User</a>
-  <a href="#" onclick="showSection('show', event)">📋 Show Users</a>
-  <a href="#" onclick="showSection('reset', event)">🔄 Reset HWID</a>
- <a href="#" onclick="showSection('sendmsg', event)">✉️ Send Message</a>
-<a href="#" onclick="showSection('project', event)">📁 Project Name</a>
+<!-- Top Navigation -->
+<nav class="top-nav">
+  <div class="nav-container">
+    <div class="logo">HydraAuth</div>
+    <div class="nav-links">
+      <a href="#" onclick="showSection('add', event)" class="active">Dashboard</a>
+      <a href="#" onclick="showSection('info', event)">Info User</a>
+      <a href="#" onclick="showSection('show', event)">Show User</a>
+      <a href="#" onclick="showSection('sendmsg', event)">Send Message</a>
+      <a href="#" onclick="showSection('sendmsg', event)">Send Message</a>
+      <a href="#" onclick="showSection('project', event)">Setting</a>
+    </div>
+  </div>
+</nav>
 
-</div>
-</div>
-
-<div class="main">
-  <div class="mb-4">
+<!-- Main Content -->
+<div class="main-content">
+  <!-- App Selector -->
+  <div class="app-selector-card">
     <label for="appSelect" class="form-label">Select Application</label>
     <select class="form-select" id="appSelect" onchange="refreshUsers()">
       <option value="SAGAR">SAGAR</option>
@@ -98,122 +410,136 @@
 
   <!-- Add User -->
   <div id="add" class="section active">
-    <h4>➕ Add User</h4>
-    <form onsubmit="addUser(event)">
-      <div class="mb-2"><input required type="text" class="form-control" placeholder="Username" id="add_username"></div>
-      <div class="mb-2"><input required type="password" class="form-control" placeholder="Password" id="add_password"></div>
-      <div class="mb-2"><input required type="date" class="form-control" id="add_expiry"></div>
-      <button class="btn btn-success">Add</button>
-    </form>
+    <div class="section-card">
+      <h4>➕ Add User</h4>
+      <form onsubmit="addUser(event)">
+        <div class="mb-3"><input required type="text" class="form-control" placeholder="Username" id="add_username"></div>
+        <div class="mb-3"><input required type="password" class="form-control" placeholder="Password" id="add_password"></div>
+        <div class="mb-3"><input required type="date" class="form-control" id="add_expiry"></div>
+        <button class="btn btn-success">Add User</button>
+      </form>
+    </div>
   </div>
 
   <!-- Delete User -->
   <div id="delete" class="section">
-    <h4>❌ Delete User</h4>
-    <form onsubmit="deleteUser(event)">
-      <div class="mb-2"><input required type="text" class="form-control" placeholder="Username" id="delete_username"></div>
-      <button class="btn btn-danger">Delete</button>
-    </form>
+    <div class="section-card">
+      <h4>❌ Delete User</h4>
+      <form onsubmit="deleteUser(event)">
+        <div class="mb-3"><input required type="text" class="form-control" placeholder="Username" id="delete_username"></div>
+        <button class="btn btn-danger">Delete User</button>
+      </form>
+    </div>
   </div>
 
   <!-- Pause User -->
   <div id="pause" class="section">
-    <h4>⏸️ Pause / Unpause User</h4>
-    <form onsubmit="pauseUser(event, 'pause')">
-      <div class="mb-2"><input required type="text" class="form-control" placeholder="Username" id="pause_username"></div>
-      <button class="btn btn-warning me-2">Pause</button>
-      <button type="button" class="btn btn-secondary" onclick="pauseUser(event, 'unpause')">Unpause</button>
-    </form>
+    <div class="section-card">
+      <h4>⏸️ Pause / Unpause User</h4>
+      <form onsubmit="pauseUser(event, 'pause')">
+        <div class="mb-3"><input required type="text" class="form-control" placeholder="Username" id="pause_username"></div>
+        <button class="btn btn-warning me-2">Pause</button>
+        <button type="button" class="btn btn-secondary" onclick="pauseUser(event, 'unpause')">Unpause</button>
+      </form>
+    </div>
   </div>
 
   <!-- Info User -->
   <div id="info" class="section">
-    <h4>ℹ️ User Info</h4>
-    <form onsubmit="infoUser(event)">
-      <div class="mb-2"><input required type="text" class="form-control" placeholder="Username" id="info_username"></div>
-      <button class="btn btn-primary">Get Info</button>
-    </form>
-    <div id="infoPanel" class="mt-3"></div>
+    <div class="section-card">
+      <h4>ℹ️ User Info</h4>
+      <form onsubmit="infoUser(event)">
+        <div class="mb-3"><input required type="text" class="form-control" placeholder="Username" id="info_username"></div>
+        <button class="btn btn-primary">Get Info</button>
+      </form>
+      <div id="infoPanel" class="mt-4"></div>
+    </div>
   </div>
 
   <!-- Show Users -->
   <div id="show" class="section">
-    <h4>📋 All Users</h4>
-    <table class="table table-bordered user-table">
-      <thead class="table-light">
-        <tr>
-          <th>Username</th>
-          <th>Password</th>
-          <th>HWID</th>
-          <th>Expiry</th>
-          <th>Created</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="userList"></tbody>
-    </table>
+    <div class="section-card">
+      <h4>📋 All Users</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Password</th>
+            <th>HWID</th>
+            <th>Expiry</th>
+            <th>Created</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="userList"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Reset HWID -->
   <div id="reset" class="section">
-    <h4>🔄 Reset HWID</h4>
-    <form onsubmit="resetHWID(event)">
-      <div class="mb-2">
-        <input required type="text" class="form-control" placeholder="Username" id="reset_username">
+    <div class="section-card">
+      <h4>🔄 Reset HWID</h4>
+      <form onsubmit="resetHWID(event)">
+        <div class="mb-3">
+          <input required type="text" class="form-control" placeholder="Username" id="reset_username">
+        </div>
+        <button class="btn btn-dark">Reset HWID</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Send Message -->
+  <div id="sendmsg" class="section">
+    <div class="section-card">
+      <h4>✉️ Send Message</h4>
+
+      <!-- Load Messages Form -->
+      <form onsubmit="loadUserMessages(event)" class="mb-3">
+        <div class="input-group">
+          <input required type="text" class="form-control" placeholder="Enter Username" id="message_username">
+          <button class="btn btn-secondary">🔄 Load</button>
+        </div>
+      </form>
+
+      <!-- Send Message Form -->
+      <form onsubmit="sendMessage(event)" class="mb-4">
+        <div class="mb-3">
+          <textarea required class="form-control" rows="3" placeholder="Type your message..." id="message_text"></textarea>
+        </div>
+        <button class="btn btn-primary">Send Message</button>
+      </form>
+
+      <!-- Message List -->
+      <div id="messageList">
+        <!-- Messages will appear here -->
       </div>
-      <button class="btn btn-dark">Reset HWID</button>
-    </form>
+    </div>
   </div>
 
-<!-- Send Message -->
-<div id="sendmsg" class="section">
-  <h4>✉️ Send Message</h4>
-
-  <!-- Load Messages Form -->
-  <form onsubmit="loadUserMessages(event)" class="mb-3">
-    <div class="input-group">
-      <input required type="text" class="form-control" placeholder="Enter Username" id="message_username">
-      <button class="btn btn-secondary">🔄 Load</button>
-    </div>
-  </form>
-
-  <!-- Send Message Form -->
-  <form onsubmit="sendMessage(event)" class="mb-3">
-    <div class="mb-2">
-      <textarea required class="form-control" rows="2" placeholder="Type your message..." id="message_text"></textarea>
-    </div>
-    <button class="btn btn-primary">Send</button>
-  </form>
-
-  <!-- Message List -->
-  <div id="messageList" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 8px;">
-    <!-- Messages will appear here -->
-  </div>
-</div>
-
-<!-- Project Name -->
-<div id="project" class="section">
-  <h4>📁 Project Name</h4>
-  <div class="mb-3 position-relative">
-    <pre id="loginCode" class="bg-dark text-white p-3 rounded" style="font-family: monospace; white-space: pre-wrap; word-break: break-word; min-height: 180px;">
+  <!-- Project Name -->
+  <div id="project" class="section">
+    <div class="section-card">
+      <h4>📝 Project Name</h4>
+      <div class="mb-3 position-relative">
+        <pre id="loginCode" class="text-white p-3 rounded" style="font-family: monospace; white-space: pre-wrap; word-break: break-word; min-height: 180px;">
 HydraAuth.login(guna2TextBox1.Text, guna2TextBox2.Text);
 
 if (HydraAuth.response.status == "success")
 {
-    string message = HydraAuth.GetLatestMessage(guna2TextBox1.Text); // ← Username pass karo
+    string message = HydraAuth.GetLatestMessage(guna2TextBox1.Text);
 
     if (!string.IsNullOrEmpty(message))
     {
         var msgDialog = new Guna2MessageDialog();
         msgDialog.Caption = "Admin Message";
         msgDialog.Text = message;
-        msgDialog.Icon = MessageDialogIcon.Warning; // Optional Icon
+        msgDialog.Icon = MessageDialogIcon.Warning;
         msgDialog.Buttons = MessageDialogButtons.OK;
         msgDialog.Show();
-
     }
 
-    Form2 main = new Form2();  // ← Proceed to Form2
+    Form2 main = new Form2();
     main.Show();
     this.Hide();
 }
@@ -221,15 +547,14 @@ else
 {
     status.Text = "Status: " + HydraAuth.response.message;
 }
-    </pre>
-    <button class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-2" onclick="copyCode()">📋</button>
-  </div>
+        </pre>
+        <button class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-2" onclick="copyCode()">📋 Copy</button>
+      </div>
 
-  <!-- 👇 Styled Description and Developer Info -->
-<p class="developer">Developer: Sagar</p>
-<div style="margin-bottom: 12px;"></div>
-<a href="/static/HydraAuth.cs" download class="btn btn-success btn-sm">⬇️ Download HydraAuth.cs</a>
-</div>
+      <p class="developer">Developer: Sagar</p>
+      <a href="/static/HydraAuth.cs" download class="btn btn-success">⬇️ Download HydraAuth.cs</a>
+    </div>
+  </div>
 </div>
 
 <div id="toast" class="toast" style="display:none;"></div>
@@ -238,7 +563,7 @@ else
 function showSection(id, e) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   if (e) e.target.classList.add('active');
   if (id === 'show') refreshUsers();
 }
@@ -248,7 +573,7 @@ function showToast(msg) {
   toast.innerText = msg;
   toast.style.display = 'block';
   toast.style.animation = 'slideIn 0.5s forwards';
-  setTimeout(() => toast.style.right = '-300px', 3000);
+  setTimeout(() => toast.style.right = '-350px', 3000);
 }
 
 function getCategory() {
@@ -376,6 +701,7 @@ function sendMessage(e) {
     }
   });
 }
+
 function loadUserMessages(e) {
   e.preventDefault();
   const username = document.getElementById("message_username").value.trim();
@@ -386,8 +712,9 @@ function loadUserMessages(e) {
 
 document.getElementById("message_username").addEventListener("input", () => {
   const username = document.getElementById("message_username").value.trim();
-  if (username.length >= 3) loadMessages(username); // 3 char baad load
+  if (username.length >= 3) loadMessages(username);
 });
+
 function loadMessages(username) {
   const category = document.getElementById("appSelect").value;
 
@@ -409,54 +736,4 @@ function loadMessages(username) {
         div.className = "border rounded p-2 mb-2 position-relative";
         div.innerHTML = `
           <div>
-            <b>${m.status === "inactive" ? "<s>" : ""}${m.text}${m.status === "inactive" ? "</s>" : ""}</b><br>
-            <small>${m.time}</small>
-            <div style="position: absolute; top: 5px; right: 10px; cursor: pointer;" onclick="toggleMenu(${i})">⋮</div>
-            <div id="menu-${i}" class="bg-light border rounded p-1" style="position:absolute; top:25px; right:10px; display:none; z-index:99;">
-              <button onclick="updateMsg('${username}', ${i}, 'active')" class="btn btn-sm btn-success w-100">Active</button>
-              <button onclick="updateMsg('${username}', ${i}, 'inactive')" class="btn btn-sm btn-warning w-100">Inactive</button>
-              <button onclick="updateMsg('${username}', ${i}, 'delete')" class="btn btn-sm btn-danger w-100">Delete</button>
-            </div>
-          </div>
-        `;
-        box.appendChild(div);
-      });
-    } else {
-      box.innerHTML = '<div class="text-muted">No messages found.</div>';
-    }
-  });
-}
-
-function toggleMenu(i) {
-  const m = document.getElementById(`menu-${i}`);
-  m.style.display = m.style.display === "none" ? "block" : "none";
-}
-
-function updateMsg(username, index, action) {
-  const category = document.getElementById("appSelect").value;
-
-  fetch('/update_message_status', {
-    method: "POST",
-    body: new URLSearchParams({
-      username: username,
-      category: category,
-      index: index,
-      action: action
-    })
-  })
-  .then(res => res.json())
-  .then(d => {
-    showToast(d.message);
-    loadMessages(username);
-  });
-}
-function copyCode() {
-  console.log("clicked");
-  const code = document.getElementById("loginCode").innerText;
-  navigator.clipboard.writeText(code)
-    .then(() => showToast("Copied login code!"))
-    .catch(() => showToast("Copy failed!"));
-}
-</script>
-</body>
-</html>
+            <b>${m.status === "inactive" ? "<s>" : ""}${m.text}${m.status ===
