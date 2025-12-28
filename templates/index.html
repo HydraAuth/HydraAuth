@@ -2,461 +2,1164 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>User Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HydraAuth Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background-color: #eef1f7; font-family: 'Segoe UI', sans-serif; }
-    .sidebar {
-      width: 240px; height: 100vh; position: fixed; background-color: #fff;
-      border-right: 1px solid #ddd; padding: 20px 0; border-top-right-radius: 15px;
-      border-bottom-right-radius: 15px; box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
     }
-    .sidebar h5, .sidebar p { text-align: center; }
-    .sidebar a {
-      display: block; padding: 12px 20px; color: #333; text-decoration: none;
-      border-radius: 10px; margin: 6px 12px; transition: 0.3s;
-    }
-    .sidebar a.active, .sidebar a:hover { background-color: #007bff; color: white; }
-    .main {
-      margin-left: 260px; padding: 30px 40px; background-color: #f9fbff;
-      border-top-left-radius: 15px; border-bottom-left-radius: 15px; min-height: 100vh;
-    }
-    .form-label { font-weight: 600; }
-    .section { display: none; }
-    .section.active {
-      display: block; background-color: white; padding: 25px;
-      border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .toast {
-      position: fixed; bottom: 20px; right: -300px; min-width: 250px;
-      background-color: #333; color: white; padding: 12px 24px;
-      border-radius: 6px; box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      animation: slideIn 0.5s forwards; z-index: 1000;
-    }
-    @keyframes slideIn {
-      from { right: -300px; } to { right: 20px; }
-    }
-    .user-table { font-size: 14px; }
 
+    /* Animated Background Particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
 
-  .download-title {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-top: 1rem;
-    margin-bottom: 0.3rem;
-  }
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: rgba(99, 102, 241, 0.5);
+      border-radius: 50%;
+      animation: float 20s infinite;
+    }
 
-  .download-desc {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 0.95rem;
-    color: #34495e;
-    margin-bottom: 0.4rem;
-  }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+    }
 
-  .developer {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #e67e22;
-  background-color: #fdf2e9;
-  padding: 4px 8px;
-  border-radius: 4px;
-  display: inline-block;
-  margin-bottom: 1rem; /* Increase from 0.6rem to 1rem */
-}
-  }
+    /* Glassmorphism Container */
+    .dashboard-container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* Modern Sidebar */
+    .neo-sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 30px 0;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    .logo-section {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 0 20px;
+    }
+
+    .logo-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .user-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 13px;
+      color: #a0aec0;
+    }
+
+    .nav-menu {
+      padding: 0 15px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      margin: 8px 0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: #a0aec0;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: scaleY(0);
+      transition: transform 0.3s;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+      color: #fff;
+    }
+
+    .nav-item.active::before {
+      transform: scaleY(1);
+    }
+
+    .nav-icon {
+      font-size: 20px;
+      margin-right: 12px;
+      width: 24px;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top Bar with App Selector */
+    .top-bar {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .app-selector-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .app-label {
+      font-weight: 600;
+      color: #a0aec0;
+    }
+
+    .neo-select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      min-width: 180px;
+    }
+
+    .neo-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .neo-select option {
+      background: #1a1a2e;
+      color: #fff;
+    }
+
+    /* Content Card */
+    .content-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      display: none;
+    }
+
+    .content-card.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    /* Modern Form Elements */
+    .neo-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      width: 100%;
+      transition: all 0.3s;
+      font-size: 15px;
+    }
+
+    .neo-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .neo-input::placeholder {
+      color: #6b7280;
+    }
+
+    .neo-textarea {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      width: 100%;
+      resize: vertical;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .neo-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    /* Gradient Buttons */
+    .neo-btn {
+      padding: 14px 28px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 15px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .neo-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .neo-btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.6);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(239, 68, 68, 0.6);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Modern Table */
+    .neo-table-wrapper {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .neo-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .neo-table thead {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .neo-table th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #a0aec0;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .neo-table td {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+    }
+
+    .neo-table tbody tr {
+      transition: all 0.3s;
+    }
+
+    .neo-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Info Card */
+    .info-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 25px;
+      margin-top: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #a0aec0;
+    }
+
+    .info-value {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* Code Block */
+    .code-container {
+      position: relative;
+      background: #1a1a2e;
+      border-radius: 16px;
+      padding: 25px;
+      margin: 20px 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .code-pre {
+      color: #e2e8f0;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 13px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Messages List */
+    .message-box {
+      max-height: 500px;
+      overflow-y: auto;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .message-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .message-text {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #e2e8f0;
+    }
+
+    .message-time {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .message-menu-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .message-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .message-menu {
+      position: absolute;
+      top: 45px;
+      right: 12px;
+      background: #1a1a2e;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 8px;
+      display: none;
+      z-index: 10;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .message-menu button {
+      display: block;
+      width: 100%;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      margin: 4px 0;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    /* Toast Notification */
+    .toast-notification {
+      position: fixed;
+      bottom: 30px;
+      right: -400px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 18px 28px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      z-index: 9999;
+      transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      font-weight: 500;
+      min-width: 300px;
+    }
+
+    .toast-notification.show {
+      right: 30px;
+    }
+
+    /* Developer Badge */
+    .dev-badge {
+      display: inline-block;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #fff;
+      border-radius: 12px;
+      font-weight: 600;
+      margin: 15px 0;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .dashboard-container {
+        flex-direction: column;
+      }
+      
+      .neo-sidebar {
+        width: 100%;
+        position: relative;
+        top: 0;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Animated Background -->
+  <div class="particles" id="particles"></div>
 
-<div class="sidebar">
-  <h5 class="text-primary">User Manager</h5>
-  <p class="text-muted">Sagar</p>
-  <a href="#" onclick="showSection('add', event)">➕ Add User</a>
-  <a href="#" onclick="showSection('delete', event)">❌ Delete User</a>
-  <a href="#" onclick="showSection('pause', event)">⏸️ Pause User</a>
-  <a href="#" onclick="showSection('info', event)">ℹ️ Info User</a>
-  <a href="#" onclick="showSection('show', event)">📋 Show Users</a>
-  <a href="#" onclick="showSection('reset', event)">🔄 Reset HWID</a>
- <a href="#" onclick="showSection('sendmsg', event)">✉️ Send Message</a>
-<a href="#" onclick="showSection('project', event)">📁 Project Name</a>
-
-</div>
-</div>
-
-<div class="main">
-  <div class="mb-4">
-    <label for="appSelect" class="form-label">Select Application</label>
-    <select class="form-select" id="appSelect" onchange="refreshUsers()">
-      <option value="SAGAR">SAGAR</option>
-      <option value="ADMIN">ADMIN</option>
-      <option value="TESTER">TESTER</option>
-    </select>
-  </div>
-
-  <!-- Add User -->
-  <div id="add" class="section active">
-    <h4>➕ Add User</h4>
-    <form onsubmit="addUser(event)">
-      <div class="mb-2"><input required type="text" class="form-control" placeholder="Username" id="add_username"></div>
-      <div class="mb-2"><input required type="password" class="form-control" placeholder="Password" id="add_password"></div>
-      <div class="mb-2"><input required type="date" class="form-control" id="add_expiry"></div>
-      <button class="btn btn-success">Add</button>
-    </form>
-  </div>
-
-  <!-- Delete User -->
-  <div id="delete" class="section">
-    <h4>❌ Delete User</h4>
-    <form onsubmit="deleteUser(event)">
-      <div class="mb-2"><input required type="text" class="form-control" placeholder="Username" id="delete_username"></div>
-      <button class="btn btn-danger">Delete</button>
-    </form>
-  </div>
-
-  <!-- Pause User -->
-  <div id="pause" class="section">
-    <h4>⏸️ Pause / Unpause User</h4>
-    <form onsubmit="pauseUser(event, 'pause')">
-      <div class="mb-2"><input required type="text" class="form-control" placeholder="Username" id="pause_username"></div>
-      <button class="btn btn-warning me-2">Pause</button>
-      <button type="button" class="btn btn-secondary" onclick="pauseUser(event, 'unpause')">Unpause</button>
-    </form>
-  </div>
-
-  <!-- Info User -->
-  <div id="info" class="section">
-    <h4>ℹ️ User Info</h4>
-    <form onsubmit="infoUser(event)">
-      <div class="mb-2"><input required type="text" class="form-control" placeholder="Username" id="info_username"></div>
-      <button class="btn btn-primary">Get Info</button>
-    </form>
-    <div id="infoPanel" class="mt-3"></div>
-  </div>
-
-  <!-- Show Users -->
-  <div id="show" class="section">
-    <h4>📋 All Users</h4>
-    <table class="table table-bordered user-table">
-      <thead class="table-light">
-        <tr>
-          <th>Username</th>
-          <th>Password</th>
-          <th>HWID</th>
-          <th>Expiry</th>
-          <th>Created</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="userList"></tbody>
-    </table>
-  </div>
-
-  <!-- Reset HWID -->
-  <div id="reset" class="section">
-    <h4>🔄 Reset HWID</h4>
-    <form onsubmit="resetHWID(event)">
-      <div class="mb-2">
-        <input required type="text" class="form-control" placeholder="Username" id="reset_username">
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="neo-sidebar">
+      <div class="logo-section">
+        <div class="logo-icon">🔐</div>
+        <div class="logo-text">HydraAuth</div>
+        <span class="user-badge">👤 Sagar</span>
       </div>
-      <button class="btn btn-dark">Reset HWID</button>
-    </form>
-  </div>
 
-<!-- Send Message -->
-<div id="sendmsg" class="section">
-  <h4>✉️ Send Message</h4>
-
-  <!-- Load Messages Form -->
-  <form onsubmit="loadUserMessages(event)" class="mb-3">
-    <div class="input-group">
-      <input required type="text" class="form-control" placeholder="Enter Username" id="message_username">
-      <button class="btn btn-secondary">🔄 Load</button>
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" onclick="showSection('add', event)">
+          <span class="nav-icon">➕</span>
+          <span>Add User</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('delete', event)">
+          <span class="nav-icon">❌</span>
+          <span>Delete User</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('pause', event)">
+          <span class="nav-icon">⏸️</span>
+          <span>Pause User</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('info', event)">
+          <span class="nav-icon">ℹ️</span>
+          <span>User Info</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('show', event)">
+          <span class="nav-icon">📋</span>
+          <span>All Users</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('reset', event)">
+          <span class="nav-icon">🔄</span>
+          <span>Reset HWID</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('sendmsg', event)">
+          <span class="nav-icon">✉️</span>
+          <span>Messages</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('project', event)">
+          <span class="nav-icon">📁</span>
+          <span>Integration</span>
+        </a>
+      </nav>
     </div>
-  </form>
 
-  <!-- Send Message Form -->
-  <form onsubmit="sendMessage(event)" class="mb-3">
-    <div class="mb-2">
-      <textarea required class="form-control" rows="2" placeholder="Type your message..." id="message_text"></textarea>
-    </div>
-    <button class="btn btn-primary">Send</button>
-  </form>
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="app-selector-wrapper">
+          <span class="app-label">Application:</span>
+          <select class="neo-select" id="appSelect" onchange="refreshUsers()">
+            <option value="SAGAR">🔹 SAGAR</option>
+            <option value="ADMIN">👑 ADMIN</option>
+            <option value="TESTER">🧪 TESTER</option>
+          </select>
+        </div>
+      </div>
 
-  <!-- Message List -->
-  <div id="messageList" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 8px;">
-    <!-- Messages will appear here -->
-  </div>
-</div>
+      <!-- Add User Section -->
+      <div id="add" class="content-card active">
+        <h2 class="section-title">
+          <div class="title-icon">➕</div>
+          Add New User
+        </h2>
+        <form onsubmit="addUser(event)">
+          <div class="form-group">
+            <input required type="text" class="neo-input" placeholder="Enter username" id="add_username">
+          </div>
+          <div class="form-group">
+            <input required type="password" class="neo-input" placeholder="Enter password" id="add_password">
+          </div>
+          <div class="form-group">
+            <input required type="date" class="neo-input" id="add_expiry">
+          </div>
+          <button class="neo-btn btn-success">Add User</button>
+        </form>
+      </div>
 
-<!-- Project Name -->
-<div id="project" class="section">
-  <h4>📁 Project Name</h4>
-  <div class="mb-3 position-relative">
-    <pre id="loginCode" class="bg-dark text-white p-3 rounded" style="font-family: monospace; white-space: pre-wrap; word-break: break-word; min-height: 180px;">
-HydraAuth.login(guna2TextBox1.Text, guna2TextBox2.Text);
+      <!-- Delete User Section -->
+      <div id="delete" class="content-card">
+        <h2 class="section-title">
+          <div class="title-icon">❌</div>
+          Delete User
+        </h2>
+        <form onsubmit="deleteUser(event)">
+          <div class="form-group">
+            <input required type="text" class="neo-input" placeholder="Enter username to delete" id="delete_username">
+          </div>
+          <button class="neo-btn btn-danger">Delete User</button>
+        </form>
+      </div>
+
+      <!-- Pause User Section -->
+      <div id="pause" class="content-card">
+        <h2 class="section-title">
+          <div class="title-icon">⏸️</div>
+          Pause / Unpause User
+        </h2>
+        <form onsubmit="pauseUser(event, 'pause')">
+          <div class="form-group">
+            <input required type="text" class="neo-input" placeholder="Enter username" id="pause_username">
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="neo-btn btn-warning">Pause User</button>
+            <button type="button" class="neo-btn btn-secondary" onclick="pauseUser(event, 'unpause')">Unpause User</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Info User Section -->
+      <div id="info" class="content-card">
+        <h2 class="section-title">
+          <div class="title-icon">ℹ️</div>
+          User Information
+        </h2>
+        <form onsubmit="infoUser(event)">
+          <div class="form-group">
+            <input required type="text" class="neo-input" placeholder="Enter username" id="info_username">
+          </div>
+          <button class="neo-btn btn-primary">Get Information</button>
+        </form>
+        <div id="infoPanel"></div>
+      </div>
+
+      <!-- Show Users Section -->
+      <div id="show" class="content-card">
+        <h2 class="section-title">
+          <div class="title-icon">📋</div>
+          All Users
+        </h2>
+        <div class="neo-table-wrapper">
+          <table class="neo-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Password</th>
+                <th>HWID</th>
+                <th>Expiry Date</th>
+                <th>Created At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="userList"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reset HWID Section -->
+      <div id="reset" class="content-card">
+        <h2 class="section-title">
+          <div class="title-icon">🔄</div>
+          Reset HWID
+        </h2>
+        <form onsubmit="resetHWID(event)">
+          <div class="form-group">
+            <input required type="text" class="neo-input" placeholder="Enter username" id="reset_username">
+          </div>
+          <button class="neo-btn btn-primary">Reset HWID</button>
+        </form>
+      </div>
+
+      <!-- Send Message Section -->
+      <div id="sendmsg" class="content-card">
+        <h2 class="section-title">
+          <div class="title-icon">✉️</div>
+          Send Message
+        </h2>
+        
+        <form onsubmit="loadUserMessages(event)" style="margin-bottom: 25px;">
+          <div class="form-group">
+            <input required type="text" class="neo-input" placeholder="Enter username to load messages" id="message_username">
+          </div>
+          <button class="neo-btn btn-secondary">Load Messages</button>
+        </form>
+
+        <form onsubmit="sendMessage(event)" style="margin-bottom: 25px;">
+          <div class="form-group">
+            <textarea required class="neo-textarea" rows="3" placeholder="Type your message here..." id="message_text"></textarea>
+          </div>
+          <button class="neo-btn btn-primary">Send Message</button>
+        </form>
+
+        <div class="message-box" id="messageList">
+          <p style="text-align: center; color: #6b7280;">Load a user to see messages</p>
+        </div>
+      </div>
+
+      <!-- Project Integration Section -->
+      <div id="project" class="content-card">
+        <h2 class="section-title">
+          <div class="title-icon">📁</div>
+          Project Integration
+        </h2>
+
+        <div class="code-container">
+          <pre id="loginCode" class="code-pre">HydraAuth.login(guna2TextBox1.Text, guna2TextBox2.Text);
 
 if (HydraAuth.response.status == "success")
 {
-    string message = HydraAuth.GetLatestMessage(guna2TextBox1.Text); // ← Username pass karo
+    string message = HydraAuth.GetLatestMessage(guna2TextBox1.Text);
 
     if (!string.IsNullOrEmpty(message))
     {
         var msgDialog = new Guna2MessageDialog();
         msgDialog.Caption = "Admin Message";
         msgDialog.Text = message;
-        msgDialog.Icon = MessageDialogIcon.Warning; // Optional Icon
+        msgDialog.Icon = MessageDialogIcon.Warning;
         msgDialog.Buttons = MessageDialogButtons.OK;
         msgDialog.Show();
-
     }
 
-    Form2 main = new Form2();  // ← Proceed to Form2
+    Form2 main = new Form2();
     main.Show();
     this.Hide();
 }
 else
 {
     status.Text = "Status: " + HydraAuth.response.message;
-}
-    </pre>
-    <button class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-2" onclick="copyCode()">📋</button>
+}</pre>
+          <button class="copy-btn" onclick="copyCode()">📋 Copy</button>
+        </div>
+
+        <div class="dev-badge">👨‍💻 Developer: Sagar</div>
+        <br>
+        <a href="/static/HydraAuth.cs" download class="neo-btn btn-success">⬇️ Download HydraAuth.cs</a>
+      </div>
+    </div>
   </div>
 
-  <!-- 👇 Styled Description and Developer Info -->
-<p class="developer">Developer: Sagar</p>
-<div style="margin-bottom: 12px;"></div>
-<a href="/static/HydraAuth.cs" download class="btn btn-success btn-sm">⬇️ Download HydraAuth.cs</a>
-</div>
-</div>
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-notification"></div>
 
-<div id="toast" class="toast" style="display:none;"></div>
-
-<script>
-function showSection(id, e) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-  if (e) e.target.classList.add('active');
-  if (id === 'show') refreshUsers();
-}
-
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.innerText = msg;
-  toast.style.display = 'block';
-  toast.style.animation = 'slideIn 0.5s forwards';
-  setTimeout(() => toast.style.right = '-300px', 3000);
-}
-
-function getCategory() {
-  return document.getElementById('appSelect').value;
-}
-
-function addUser(e) {
-  e.preventDefault();
-  fetch('/add_user', {
-    method: 'POST',
-    body: new URLSearchParams({
-      category: getCategory(),
-      username: document.getElementById('add_username').value,
-      password: document.getElementById('add_password').value,
-      expiry: document.getElementById('add_expiry').value
-    })
-  }).then(res => res.json()).then(d => {
-    showToast(d.message);
-    if (d.status === 'success') refreshUsers();
-  });
-}
-
-function deleteUser(e) {
-  e.preventDefault();
-  fetch('/delete_user', {
-    method: 'POST',
-    body: new URLSearchParams({
-      category: getCategory(),
-      username: document.getElementById('delete_username').value
-    })
-  }).then(res => res.json()).then(d => {
-    showToast(d.message);
-    if (d.status === 'success') refreshUsers();
-  });
-}
-
-function pauseUser(e, action) {
-  e.preventDefault();
-  fetch('/pause_user', {
-    method: 'POST',
-    body: new URLSearchParams({
-      category: getCategory(),
-      username: document.getElementById('pause_username').value,
-      action: action
-    })
-  }).then(res => res.json()).then(d => showToast(d.message));
-}
-
-function infoUser(e) {
-  e.preventDefault();
-  fetch('/info_user', {
-    method: 'POST',
-    body: new URLSearchParams({
-      category: getCategory(),
-      username: document.getElementById('info_username').value
-    })
-  }).then(res => res.json()).then(d => {
-    if (d.status === 'success') {
-      const u = d.data;
-      document.getElementById('infoPanel').innerHTML = `
-        <div class="card mt-3"><div class="card-body">
-          <p><b>User:</b> ${u.Username}</p>
-          <p><b>Pass:</b> ${u.Password}</p>
-          <p><b>HWID:</b> ${u.HWID || 'None'}</p>
-          <p><b>Expiry:</b> ${u.Expiry}</p>
-          <p><b>Created:</b> ${u.CreatedAt}</p>
-          <p><b>Status:</b> ${u.Status || 'Unknown'}</p>
-        </div></div>
-      `;
-    } else {
-      showToast(d.message);
+  <script>
+    // Create animated particles
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        container.appendChild(particle);
+      }
     }
-  });
-}
+    createParticles();
 
-function refreshUsers() {
-  fetch('/get_users', {
-    method: 'POST',
-    body: new URLSearchParams({ category: getCategory() })
-  }).then(res => res.json()).then(users => {
-    const table = document.getElementById('userList');
-    table.innerHTML = '';
-    users.forEach(u => {
-      table.innerHTML += `<tr>
-        <td>${u.Username}</td>
-        <td>${u.Password}</td>
-        <td>${u.HWID || 'None'}</td>
-        <td>${u.Expiry}</td>
-        <td>${u.CreatedAt}</td>
-        <td>${u.Status || 'Unknown'}</td>
-      </tr>`;
-    });
-  });
-}
-
-function resetHWID(e) {
-  e.preventDefault();
-  fetch('/reset_hwid', {
-    method: 'POST',
-    body: new URLSearchParams({
-      category: getCategory(),
-      username: document.getElementById('reset_username').value
-    })
-  }).then(res => res.json()).then(d => showToast(d.message));
-}
-
-function sendMessage(e) {
-  e.preventDefault();
-  const user = document.getElementById("message_username").value.trim();
-  const msg = document.getElementById("message_text").value.trim();
-
-  fetch('/send_message', {
-    method: 'POST',
-    body: new URLSearchParams({
-      username: user,
-      message: msg
-    })
-  })
-  .then(res => res.json())
-  .then(d => {
-    showToast(d.message);
-    if (d.status === 'success') {
-      document.getElementById("message_text").value = '';
-      loadMessages(user);
+    // Section Navigation
+    function showSection(id, e) {
+      document.querySelectorAll('.content-card').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
+      if (e) e.target.closest('.nav-item').classList.add('active');
+      if (id === 'show') refreshUsers();
     }
-  });
-}
-function loadUserMessages(e) {
-  e.preventDefault();
-  const username = document.getElementById("message_username").value.trim();
-  if (username) {
-    loadMessages(username);
-  }
-}
 
-document.getElementById("message_username").addEventListener("input", () => {
-  const username = document.getElementById("message_username").value.trim();
-  if (username.length >= 3) loadMessages(username); // 3 char baad load
-});
-function loadMessages(username) {
-  const category = document.getElementById("appSelect").value;
+    // Toast Notification
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
 
-  fetch('/get_messages', {
-    method: 'POST',
-    body: new URLSearchParams({
-      category: category,
-      username: username
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    const box = document.getElementById("messageList");
-    box.innerHTML = '';
+    function getCategory() {
+      return document.getElementById('appSelect').value;
+    }
 
-    if (data.status === 'success') {
-      data.messages.forEach((m, i) => {
-        const div = document.createElement("div");
-        div.className = "border rounded p-2 mb-2 position-relative";
-        div.innerHTML = `
-          <div>
-            <b>${m.status === "inactive" ? "<s>" : ""}${m.text}${m.status === "inactive" ? "</s>" : ""}</b><br>
-            <small>${m.time}</small>
-            <div style="position: absolute; top: 5px; right: 10px; cursor: pointer;" onclick="toggleMenu(${i})">⋮</div>
-            <div id="menu-${i}" class="bg-light border rounded p-1" style="position:absolute; top:25px; right:10px; display:none; z-index:99;">
-              <button onclick="updateMsg('${username}', ${i}, 'active')" class="btn btn-sm btn-success w-100">Active</button>
-              <button onclick="updateMsg('${username}', ${i}, 'inactive')" class="btn btn-sm btn-warning w-100">Inactive</button>
-              <button onclick="updateMsg('${username}', ${i}, 'delete')" class="btn btn-sm btn-danger w-100">Delete</button>
-            </div>
-          </div>
-        `;
-        box.appendChild(div);
+    // Add User
+    function addUser(e) {
+      e.preventDefault();
+      fetch('/add_user', {
+        method: 'POST',
+        body: new URLSearchParams({
+          category: getCategory(),
+          username: document.getElementById('add_username').value,
+          password: document.getElementById('add_password').value,
+          expiry: document.getElementById('add_expiry').value
+        })
+      }).then(res => res.json()).then(d => {
+        showToast(d.message);
+        if (d.status === 'success') {
+          refreshUsers();
+          document.getElementById('add_username').value = '';
+          document.getElementById('add_password').value = '';
+          document.getElementById('add_expiry').value = '';
+        }
       });
-    } else {
-      box.innerHTML = '<div class="text-muted">No messages found.</div>';
     }
-  });
-}
 
-function toggleMenu(i) {
-  const m = document.getElementById(`menu-${i}`);
-  m.style.display = m.style.display === "none" ? "block" : "none";
-}
+    // Delete User
+    function deleteUser(e) {
+      e.preventDefault();
+      fetch('/delete_user', {
+        method: 'POST',
+        body: new URLSearchParams({
+          category: getCategory(),
+          username: document.getElementById('delete_username').value
+        })
+      }).then(res => res.json()).then(d => {
+        showToast(d.message);
+        if (d.status === 'success') {
+          refreshUsers();
+          document.getElementById('delete_username').value = '';
+        }
+      });
+    }
 
-function updateMsg(username, index, action) {
-  const category = document.getElementById("appSelect").value;
+    // Pause User
+    function pauseUser(e, action) {
+      e.preventDefault();
+      fetch('/pause_user', {
+        method: 'POST',
+        body: new URLSearchParams({
+          category: getCategory(),
+          username: document.getElementById('pause_username').value,
+          action: action
+        })
+      }).then(res => res.json()).then(d => showToast(d.message));
+    }
 
-  fetch('/update_message_status', {
-    method: "POST",
-    body: new URLSearchParams({
-      username: username,
-      category: category,
-      index: index,
-      action: action
-    })
-  })
-  .then(res => res.json())
-  .then(d => {
-    showToast(d.message);
-    loadMessages(username);
-  });
-}
-function copyCode() {
-  console.log("clicked");
-  const code = document.getElementById("loginCode").innerText;
-  navigator.clipboard.writeText(code)
-    .then(() => showToast("Copied login code!"))
-    .catch(() => showToast("Copy failed!"));
-}
-</script>
+    // Info User
+    function infoUser(e) {
+      e.preventDefault();
+      fetch('/info_user', {
+        method: 'POST',
+        body: new URLSearchParams({
+          category: getCategory(),
+          username: document.getElementById('info_username').value
+        })
+      }).then(res => res.json()).then(d => {
+        if (d.status === 'success') {
+          const u = d.data;
+          document.getElementById('infoPanel').innerHTML = `
+            <div class="info-card">
+              <div class="info-item">
+                <span class="info-label">Username:</span>
+                <span class="info-value">${u.Username}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Password:</span>
+                <span class="info-value">${u.Password}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">HWID:</span>
+                <span class="info-value">${u.HWID || 'None'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Expiry Date:</span>
+                <span class="info-value">${u.Expiry}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Created At:</span>
+                <span class="info-value">${u.CreatedAt}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="info-value">${u.Status || 'Unknown'}</span>
+              </div>
+            </div>
+          `;
+        } else {
+          showToast(d.message);
+        }
+      });
+    }
+
+    // Refresh Users
+    function refreshUsers() {
+      fetch('/get_users', {
+        method: 'POST',
+        body: new URLSearchParams({ category: getCategory() })
+      }).then(res => res.json()).then(users => {
+        const table = document.getElementById('userList');
+        table.innerHTML = '';
+        users.forEach(u => {
+          table.innerHTML += `<tr>
+            <td>${u.Username}</td>
+            <td>${u.Password}</td>
+            <td>${u.HWID || 'None'}</td>
+            <td>${u.Expiry}</td>
+            <td>${u.CreatedAt}</td>
+            <td>${u.Status || 'Unknown'}</td>
+          </tr>`;
+        });
+      });
+    }
+
+    // Reset HWID
+    function resetHWID(e) {
+      e.preventDefault();
+      fetch('/reset_hwid', {
+        method: 'POST',
+        body: new URLSearchParams({
+          category: getCategory(),
+          username: document.getElementById('reset_username').value
+        })
+      }).then(res => res.json()).then(d => {
+        showToast(d.message);
+        if (d.status === 'success') {
+          document.getElementById('reset_username').value = '';
+        }
+      });
+    }
+
+    // Send Message
+    function sendMessage(e) {
+      e.preventDefault();
+      const user = document.getElementById("message_username").value.trim();
+      const msg = document.getElementById("message_text").value.trim();
+
+      fetch('/send_message', {
+        method: 'POST',
+        body: new URLSearchParams({
+          username: user,
+          message: msg
+        })
+      })
+      .then(res => res.json())
+      .then(d => {
+        showToast(d.message);
+        if (d.status === 'success') {
+          document.getElementById("message_text").value = '';
+          loadMessages(user);
+        }
+      });
+    }
+
+    // Load User Messages
+    function loadUserMessages(e) {
+      e.preventDefault();
+      const username = document.getElementById("message_username").value.trim();
+      if (username) {
+        loadMessages(username);
+      }
+    }
+
+    // Auto-load on username input
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById("message_username").addEventListener("input", () => {
+        const username = document.getElementById("message_username").value.trim();
+        if (username.length >= 3) loadMessages(username);
+      });
+    });
+
+    // Load Messages
+    function loadMessages(username) {
+      const category = document.getElementById("appSelect").value;
+
+      fetch('/get_messages', {
+        method: 'POST',
+        body: new URLSearchParams({
+          category: category,
+          username: username
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const box = document.getElementById("messageList");
+        box.innerHTML = '';
+
+        if (data.status === 'success' && data.messages.length > 0) {
+          data.messages.forEach((m, i) => {
+            const div = document.createElement("div");
+            div.className = "message-item";
+            div.innerHTML = `
+              <div class="message-text">${m.status === "inactive" ? "<s>" : ""}${m.text}${m.status === "inactive" ? "</s>" : ""}</div>
+              <div class="message-time">${m.time}</div>
+              <button class="message-menu-btn" onclick="toggleMenu(${i})">⋮</button>
+              <div id="menu-${i}" class="message-menu">
+                <button onclick="updateMsg('${username}', ${i}, 'active')" class="neo-btn btn-success" style="padding: 8px 16px; font-size: 13px;">Active</button>
+                <button onclick="updateMsg('${username}', ${i}, 'inactive')" class="neo-btn btn-warning" style="padding: 8px 16px; font-size: 13px;">Inactive</button>
+                <button onclick="updateMsg('${username}', ${i}, 'delete')" class="neo-btn btn-danger" style="padding: 8px 16px; font-size: 13px;">Delete</button>
+              </div>
+            `;
+            box.appendChild(div);
+          });
+        } else {
+          box.innerHTML = '<p style="text-align: center; color: #6b7280;">No messages found</p>';
+        }
+      });
+    }
+
+    // Toggle Message Menu
+    function toggleMenu(i) {
+      const menu = document.getElementById(`menu-${i}`);
+      const allMenus = document.querySelectorAll('.message-menu');
+      allMenus.forEach(m => {
+        if (m.id !== `menu-${i}`) m.style.display = 'none';
+      });
+      menu.style.display = menu.style.display === "none" ? "block" : "none";
+    }
+
+    // Update Message Status
+    function updateMsg(username, index, action) {
+      const category = document.getElementById("appSelect").value;
+
+      fetch('/update_message_status', {
+        method: "POST",
+        body: new URLSearchParams({
+          username: username,
+          category: category,
+          index: index,
+          action: action
+        })
+      })
+      .then(res => res.json())
+      .then(d => {
+        showToast(d.message);
+        loadMessages(username);
+      });
+    }
+
+    // Copy Code
+    function copyCode() {
+      const code = document.getElementById("loginCode").innerText;
+      navigator.clipboard.writeText(code)
+        .then(() => showToast("✅ Code copied to clipboard!"))
+        .catch(() => showToast("❌ Failed to copy code"));
+    }
+
+    // Close menus on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.message-menu-btn') && !e.target.closest('.message-menu')) {
+        document.querySelectorAll('.message-menu').forEach(m => m.style.display = 'none');
+      }
+    });
+  </script>
 </body>
 </html>
