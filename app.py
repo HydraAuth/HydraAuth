@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 import os
 
-app = Flask(_name_)
+app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # Admin credentials
@@ -247,33 +247,6 @@ def send_message():
     if save_data(data):
         return jsonify({"status": "success", "message": "Message saved"})
     return jsonify({"status": "error", "message": "Failed to save message"})
-
-
-@app.route("/set_update_permission", methods=["POST"])
-def set_update_permission():
-    data = load_data()
-    category = request.form.get("category")
-    username = request.form.get("username")
-    allow = request.form.get("allow_update") == "true"
-
-    if category not in data:
-        return jsonify({"status": "error", "message": "Invalid category"})
-
-    for user in data[category]:
-        if user["Username"] == username:
-            user["allow_update"] = allow
-            if save_data(data):
-                return jsonify({
-                    "status": "success",
-                    "message": f"Update {'enabled' if allow else 'disabled'} for {username}"
-                })
-            return jsonify({"status": "error", "message": "Save failed"})
-
-    return jsonify({"status": "error", "message": "User not found"})
-
-
-
-
 
 @app.route("/update_message_status", methods=["POST"])
 def update_message_status():
