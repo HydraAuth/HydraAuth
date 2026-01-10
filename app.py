@@ -278,22 +278,24 @@ def update_message_status():
     return jsonify({"status": "error", "message": "User not found"})
 
 
-@app.route("/can_update", methods=["POST"])
-def can_update():
+@@app.route("/toggle_update", methods=["POST"])
+def toggle_update():
     data = load_data()
     category = request.form["category"]
     username = request.form["username"]
+    value = request.form["value"] == "true"
 
-    if category not in data:
-        return jsonify({"can_update": False})
-
-    for user in data[category]:
+    for user in data.get(category, []):
         if user["Username"] == username:
-            return jsonify({
-                "can_update": user.get("CanUpdate", False)
-            })
+            user["CanUpdate"] = value
+            if save_data(data):
+                return jsonify({
+                    "status": "success",
+                    "message": f"Update {'enabled' if value else 'disabled'}"
+                })
+            return jsonify({"status": "error", "message": "Save failed"})
 
-    return jsonify({"can_update": False})
+    return jsonify({"status": "error", "message": "User not found"})
 
 # ---------------------------- Run ----------------------------
 
