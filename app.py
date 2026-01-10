@@ -80,14 +80,16 @@ def add_user():
     if any(u["Username"] == username for u in data[category]):
         return jsonify({"status": "error", "message": "Username already exists"})
 
-    data[category].append({
-        "Username": username,
-        "Password": password,
-        "HWID": None,
-        "Status": "Active",
-        "Expiry": expiry,
-        "CreatedAt": datetime.today().strftime("%Y-%m-%d")
-    })
+   data[category].append({
+    "Username": username,
+    "Password": password,
+    "HWID": None,
+    "Status": "Active",
+    "Expiry": expiry,
+    "CreatedAt": datetime.today().strftime("%Y-%m-%d"),
+    "CanUpdate": True   # 🔥 NEW
+})
+
 
     if save_data(data):
         return jsonify({"status": "success", "message": "User added successfully"})
@@ -274,6 +276,24 @@ def update_message_status():
             return jsonify({"status": "error", "message": "Invalid message index"})
 
     return jsonify({"status": "error", "message": "User not found"})
+
+
+@app.route("/can_update", methods=["POST"])
+def can_update():
+    data = load_data()
+    category = request.form["category"]
+    username = request.form["username"]
+
+    if category not in data:
+        return jsonify({"can_update": False})
+
+    for user in data[category]:
+        if user["Username"] == username:
+            return jsonify({
+                "can_update": user.get("CanUpdate", False)
+            })
+
+    return jsonify({"can_update": False})
 
 # ---------------------------- Run ----------------------------
 
