@@ -773,8 +773,6 @@
                 <th>Expiry Date</th>
                 <th>Created At</th>
                 <th>Status</th>
-                <th>Update</th>
-
               </tr>
             </thead>
             <tbody id="userList"></tbody>
@@ -1018,12 +1016,6 @@ else
             <td>${u.Expiry}</td>
             <td>${u.CreatedAt}</td>
             <td>${u.Status || 'Unknown'}</td>
-            <td>
-  <input type="checkbox"
-    ${u.CanUpdate ? "checked" : ""}
-    onchange="toggleUpdate('${u.Username}', this.checked)">
-</td>
-
           </tr>`;
         });
       });
@@ -1153,20 +1145,6 @@ else
         loadMessages(username);
       });
     }
-
-    function toggleUpdate(username, value) {
-  fetch('/toggle_update', {
-    method: 'POST',
-    body: new URLSearchParams({
-      category: getCategory(),
-      username: username,
-      value: value
-    })
-  })
-  .then(res => res.json())
-  .then(d => showToast(d.message));
-}
-
 
     // Copy Code
     function copyCode() {
