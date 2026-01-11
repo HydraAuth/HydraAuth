@@ -80,16 +80,14 @@ def add_user():
     if any(u["Username"] == username for u in data[category]):
         return jsonify({"status": "error", "message": "Username already exists"})
 
-   data[category].append({
-    "Username": username,
-    "Password": password,
-    "HWID": None,
-    "Status": "Active",
-    "Expiry": expiry,
-    "CreatedAt": datetime.today().strftime("%Y-%m-%d"),
-    "CanUpdate": True   # 🔥 NEW
-})
-
+    data[category].append({
+        "Username": username,
+        "Password": password,
+        "HWID": None,
+        "Status": "Active",
+        "Expiry": expiry,
+        "CreatedAt": datetime.today().strftime("%Y-%m-%d")
+    })
 
     if save_data(data):
         return jsonify({"status": "success", "message": "User added successfully"})
@@ -274,26 +272,6 @@ def update_message_status():
                     return jsonify({"status": "success", "message": f"Message {action}d"})
                 return jsonify({"status": "error", "message": "Failed to update message"})
             return jsonify({"status": "error", "message": "Invalid message index"})
-
-    return jsonify({"status": "error", "message": "User not found"})
-
-
-@@app.route("/toggle_update", methods=["POST"])
-def toggle_update():
-    data = load_data()
-    category = request.form["category"]
-    username = request.form["username"]
-    value = request.form["value"] == "true"
-
-    for user in data.get(category, []):
-        if user["Username"] == username:
-            user["CanUpdate"] = value
-            if save_data(data):
-                return jsonify({
-                    "status": "success",
-                    "message": f"Update {'enabled' if value else 'disabled'}"
-                })
-            return jsonify({"status": "error", "message": "Save failed"})
 
     return jsonify({"status": "error", "message": "User not found"})
 
